@@ -165,7 +165,10 @@ macro_rules! eprintln {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    WRITER.lock().write_fmt(args).unwrap();
+    use x86_64::instructions::interrupts;
+    interrupts::without_interrupts(|| {
+        WRITER.lock().write_fmt(args).unwrap();
+    });
 }
 
 
@@ -191,20 +194,30 @@ fn test_println_many() {
 
 #[test_case]
 fn test_println_output() {
-    let s = "Some test string tgat fits on a single line";
-    println!("{}", s);
-    for (i, c) in  s.chars().enumerate() {
-        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
-        assert_eq!(char::from(screen_char.ascii_character), c);
-    }
+    use x86_64::instructions::interrupts;
+
+    let s = "Some test string that fits on a single line";
+    interrupts::without_interrupts(|| {
+        println!("\n{}", s);
+
+        for (i, c) in  s.chars().enumerate() {
+            let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+            assert_eq!(char::from(screen_char.ascii_character), c);
+        }
+    });
 }
 
 #[test_case]
 fn test_println_unsuported_chars() {
+    use x86_64::instructions::interrupts;
+
     let s = "éèâ®àä×çßñ";
-    println!("{}", s);
-    for i in 0..(s.chars().count() * 2) {
-        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
-        assert_eq!(char::from(screen_char.ascii_character), char::from(0xfe));
-    }
+    interrupts::without_interrupts(|| {
+        println!("\n{}", s);
+
+        for i in 0..(s.chars().count() * 2) {
+            let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+            assert_eq!(char::from(screen_char.ascii_character), char::from(0xfe));
+        }
+    });
 }

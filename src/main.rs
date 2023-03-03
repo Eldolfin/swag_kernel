@@ -5,26 +5,30 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use swag_kernel::{println, eprintln};
-
+use swag_kernel::{println, hlt_loop};
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("Swag Kernel!");
 
+    swag_kernel::init();
+
     #[cfg(test)]
     test_main();
+
+    println!("No crash!");
     
-    #[allow(clippy::empty_loop)]
-    loop {}
+    hlt_loop();
 }
 
 /// This function is called on panic.
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
+    use swag_kernel::eprintln;
     eprintln!("{}", info);
-    loop {}
+
+    hlt_loop();
 }
 
 #[cfg(test)]

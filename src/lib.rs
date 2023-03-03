@@ -1,12 +1,15 @@
 #![no_std]
 
-#![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
+#![feature(abi_x86_interrupt)]
+#![cfg_attr(test, no_main)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
 pub mod vga_buffer;
 pub mod serial;
+pub mod interrupts;
+pub mod gdt;
 
 use crate::serial::{Green, Red};
 use core::panic::PanicInfo;
@@ -44,17 +47,29 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("Error: {}\n", info);
     exit_qemu(QemuExitCode::Failed);
 
-    #[allow(clippy::empty_loop)]
-    loop {}
+    hlt_loop();
+}
+
+pub fn init() {
+    gdt::init();
+    interrupts::init_idt();
+    unsafe { interrupts::PICS.lock().initialize() };
+    x86_64::instructions::interrupts::enable();
 }
 
 #[cfg(test)]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+    init();
     test_main();
 
-    #[allow(clippy::empty_loop)]
-    loop {}
+    hlt_loop();
+}
+
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
+    }
 }
 
 #[cfg(test)]

@@ -2,7 +2,7 @@
 #![no_main]
 
 use core::panic::PanicInfo;
-use swag_kernel::{serial_println, exit_qemu, QemuExitCode, serial_print, serial::{Green, Red}};
+use swag_kernel::{serial_println, exit_qemu, QemuExitCode, serial_print, serial::{Green, Red}, hlt_loop};
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
@@ -10,7 +10,7 @@ pub extern "C" fn _start() -> ! {
     serial_println!("{}", Red("[test did not panic]"));
     exit_qemu(QemuExitCode::Failed);
 
-    loop {}
+    hlt_loop();
 }
 
 #[panic_handler]
@@ -18,7 +18,7 @@ fn panic(_: &PanicInfo) -> ! {
     serial_println!("{}", Green("[ok]"));
     exit_qemu(QemuExitCode::Success);
 
-    loop {}
+    hlt_loop();
 }
 
 fn should_fail() {
