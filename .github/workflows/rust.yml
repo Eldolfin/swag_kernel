@@ -17,8 +17,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Setup
-      run: apt install qemu-user qemu-system-x86
+    - name: install Qemu
+      run: sudo apt install qemu-user qemu-system-x86 -y
     - name: install rustup
       run: curl https://sh.rustup.rs -sSf | sh -s -- -y
     - name: source env file
