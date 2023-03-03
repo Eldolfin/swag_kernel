@@ -5,3 +5,6 @@ check:
 
 run:
 	cargo run 
+
+test:
+	cargo test

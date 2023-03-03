@@ -30,11 +30,11 @@ enum Color {
 #[repr(transparent)]
 pub struct ColorCode(u8);
 
-impl ColorCode {
-    fn new(foreground: Color, background: Color) -> Self {
-        Self((background as u8) << 4 | (foreground as u8))
-    }
-}
+// impl ColorCode {
+//     fn new(foreground: Color, background: Color) -> Self {
+//         Self((background as u8) << 4 | (foreground as u8))
+//     }
+// }
 
 pub const NORMAL_COLOR: ColorCode = ColorCode((Color::Black as u8) << 4 | (Color::White as u8));
 pub const ERR_COLOR: ColorCode  = ColorCode((Color::White as u8) << 4 | (Color::Red as u8));
@@ -172,4 +172,39 @@ pub fn _print(args: fmt::Arguments) {
 #[doc(hidden)]
 pub fn _set_print_color(color_code: ColorCode) {
     WRITER.lock().color_code = color_code;
+}
+
+
+
+#[test_case]
+fn test_println_simple() {
+    println!("test_println_simple output");
+}
+
+
+#[test_case]
+fn test_println_many() {
+    for _ in 0..200 {
+        println!("test_println_many output");
+    }
+}
+
+#[test_case]
+fn test_println_output() {
+    let s = "Some test string tgat fits on a single line";
+    println!("{}", s);
+    for (i, c) in  s.chars().enumerate() {
+        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+        assert_eq!(char::from(screen_char.ascii_character), c);
+    }
+}
+
+#[test_case]
+fn test_println_unsuported_chars() {
+    let s = "éèâ®àä×çßñ";
+    println!("{}", s);
+    for i in 0..(s.chars().count() * 2) {
+        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+        assert_eq!(char::from(screen_char.ascii_character), char::from(0xfe));
+    }
 }
