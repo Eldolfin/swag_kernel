@@ -21,7 +21,7 @@ where
     T: Fn(),
 {
     fn run(&self) {
-        serial_println!("{}...\t", core::any::type_name::<T>());
+        serial_print!("{}...\t", core::any::type_name::<T>());
         self();
         serial_println!("{}", Green("[ok]"));
     }
