@@ -46,18 +46,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "swag_kernel"
-version = "0.1.0"
-dependencies = [
- "bootloader",
- "lazy_static",
- "spin 0.9.5",
- "uart_16550",
- "volatile 0.2.7",
- "x86_64",
-]
-
-[[package]]
 name = "rustversion"
 version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -82,6 +70,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7dccf47db1b41fa1573ed27ccf5e08e3ca771cb994f776668c5ebda893b248fc"
 dependencies = [
  "lock_api",
+]
+
+[[package]]
+name = "swag_kernel"
+version = "0.1.0"
+dependencies = [
+ "bootloader",
+ "lazy_static",
+ "spin 0.9.5",
+ "uart_16550",
+ "volatile 0.2.7",
+ "x86_64",
 ]
 
 [[package]]
