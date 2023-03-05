@@ -1,7 +1,7 @@
-use crate::print;
+use crate::{print, hlt_loop};
 
 use pic8259::ChainedPics;
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
 use crate::{eprintln, gdt};
 use lazy_static::lazy_static;
 
@@ -34,6 +34,8 @@ lazy_static! {
         
         idt[InterruptIndex::Keyboard.into()]
             .set_handler_fn(keyboard_interrupt_handler);
+
+        idt.page_fault.set_handler_fn(page_fault_handler);
 
         idt
     };
@@ -96,20 +98,34 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(
     }
 }
 
+extern "x86-interrupt" fn page_fault_handler(
+    stack_frame: InterruptStackFrame,
+    error_code: PageFaultErrorCode,
+) {
+    use x86_64::registers::control::Cr2;
+
+    eprintln!("EXCEPTION: PAGE FAULT");
+    eprintln!("Accessed Address: {:?}", Cr2::read());
+    eprintln!("Error Code: {:?}", error_code);
+    eprintln!("{:#?}", stack_frame);
+    hlt_loop();
+}
+
+
+
 pub fn init_idt() {
     IDT.load();
 }
 
-
-impl Into<u8> for InterruptIndex {
-    fn into(self) -> u8 {
-        self as u8
+impl From<InterruptIndex> for u8 {
+    fn from(value: InterruptIndex) -> Self {
+        value as u8
     }
 }
 
-impl Into<usize> for InterruptIndex {
-    fn into(self) -> usize {
-        self as usize
+impl From<InterruptIndex> for usize {
+    fn from(value: InterruptIndex) -> Self {
+        value as usize
     }
 }
 

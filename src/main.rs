@@ -5,13 +5,26 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use swag_kernel::{println, hlt_loop};
+use bootloader::{BootInfo, entry_point};
+use swag_kernel::println;
+use swag_kernel::hlt_loop;
 
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+entry_point!(kernel_main);
+
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("Swag Kernel!");
 
     swag_kernel::init();
+
+    // use swag_kernel::memory::BootInfoFrameAllocator;
+    // use swag_kernel::memory;
+    // use x86_64::VirtAddr;
+    //
+    // let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    // let mut mapper = unsafe { memory::init(phys_mem_offset) };
+    // let mut frame_allocator = unsafe {
+    //     BootInfoFrameAllocator::init(&boot_info.memory_map)
+    // };
 
     #[cfg(test)]
     test_main();
