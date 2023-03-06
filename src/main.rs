@@ -7,10 +7,6 @@
 extern crate alloc;
 
 use core::panic::PanicInfo;
-use alloc::boxed::Box;
-use alloc::rc::Rc;
-use alloc::vec::Vec;
-use alloc::vec;
 use bootloader::{BootInfo, entry_point};
 use swag_kernel::allocator;
 use swag_kernel::println;
