@@ -1,3 +1,5 @@
+![Continuous integration](https://github.com/Eldolfin/swag_kernel/actions/workflows/rust.yml/badge.svg)
+
 # Swag Kernel*
 
 \*I should find a better name for this 😮‍💨
@@ -9,8 +11,6 @@
   - [Purpose of this project](#purpose-of-this-project)
   - [Resources](#resources)
 <!--toc:end-->
-
-![Continuous integration](https://github.com/Eldolfin/swag_kernel/actions/workflows/rust.yml/badge.svg)
 
 ## TODO:
 - [x] Document tutorial code
