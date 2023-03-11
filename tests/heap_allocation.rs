@@ -7,6 +7,7 @@
 extern crate alloc;
 
 use bootloader::{entry_point, BootInfo};
+use swag_kernel::hlt_loop;
 use core::panic::PanicInfo;
 
 entry_point!(main);
@@ -26,7 +27,7 @@ fn main(boot_info: &'static BootInfo) -> ! {
         .expect("heap initialization failed");
 
     test_main();
-    loop {}
+    hlt_loop();
 }
 
 #[panic_handler]

@@ -4,6 +4,22 @@ use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;
 
+/// Color used in the print! macros
+pub const NORMAL_COLOR: ColorCode = ColorCode((Color::Black as u8) << 4 | (Color::White as u8));
+/// Color used in the eprintln! macro
+pub const ERR_COLOR: ColorCode  = ColorCode((Color::White as u8) << 4 | (Color::Red as u8));
+
+/// Memory address at which we write output
+const VGA_ADDRESS : usize = 0xb8000;
+
+const BUFFER_HEIGHT: usize = 25;
+const BUFFER_WIDTH: usize = 80;
+
+// global `Writer` used in the print! macros
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer::new());
+}
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -26,18 +42,13 @@ enum Color {
     White = 15,
 }
 
+/// `ColorCode` is a u8 wrapper that contains
+/// text color and background color
+/// background color being the first 4 bits and
+/// text color being the last 4 bits
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
 pub struct ColorCode(u8);
-
-// impl ColorCode {
-//     fn new(foreground: Color, background: Color) -> Self {
-//         Self((background as u8) << 4 | (foreground as u8))
-//     }
-// }
-
-pub const NORMAL_COLOR: ColorCode = ColorCode((Color::Black as u8) << 4 | (Color::White as u8));
-pub const ERR_COLOR: ColorCode  = ColorCode((Color::White as u8) << 4 | (Color::Red as u8));
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
@@ -45,9 +56,6 @@ struct ScreenChar {
     ascii_character: u8,
     color_code: ColorCode,
 }
-
-const BUFFER_HEIGHT: usize = 25;
-const BUFFER_WIDTH: usize = 80;
 
 #[repr(transparent)]
 struct Buffer {
@@ -60,11 +68,13 @@ pub struct Writer {
     buffer: &'static mut Buffer,
 }
 
-const VGA_ADDRESS : usize = 0xb8000;
-
-lazy_static! {
-    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer::new());
+impl ColorCode {
+    #![allow(dead_code)]
+    fn new(text: Color, background: Color) -> Self {
+        Self((background as u8) << 4 | (text as u8))
+    }
 }
+
 
 impl Writer {
     fn new() -> Self {

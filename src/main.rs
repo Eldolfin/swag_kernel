@@ -10,21 +10,15 @@ use core::panic::PanicInfo;
 use bootloader::{BootInfo, entry_point};
 use swag_kernel::allocator;
 use swag_kernel::println;
-use swag_kernel::hlt_loop;
 use swag_kernel::task::executor::Executor;
 use swag_kernel::task::keyboard;
 use swag_kernel::task::Task;
 
+#[cfg(not(test))]
+use swag_kernel::hlt_loop;
+
+
 entry_point!(kernel_main);
-
-async fn async_number() -> u32 {
-    42
-}
-
-async fn example_task() {
-    let number = async_number().await;
-    println!("async number: {number}");
-}
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use swag_kernel::memory::BootInfoFrameAllocator;
@@ -49,7 +43,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     #[cfg(test)]
     test_main();
 
-    let mut executor = Executor::new();
+    let mut executor = Executor::default();
     executor.spawn(Task::new(keyboard::print_keypresses()));
     executor.run();
 }
@@ -73,5 +67,6 @@ fn panic(info: &PanicInfo) -> ! {
 
 #[test_case]
 fn trivial_assertion() {
-    assert_eq!(1, 1);
+    let two = 1+1;
+    assert_eq!(two, 2);
 }

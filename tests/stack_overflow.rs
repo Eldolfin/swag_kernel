@@ -4,10 +4,11 @@
 #![feature(abi_x86_interrupt)]
 
 use core::panic::PanicInfo;
-
 use lazy_static::lazy_static;
-use swag_kernel::{serial_print, serial::Green, exit_qemu, QemuExitCode, serial_println, hlt_loop};
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+
+use swag_kernel::{serial_print, serial::Green, serial_println, hlt_loop};
+use swag_kernel::qemu::*;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {

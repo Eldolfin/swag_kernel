@@ -2,7 +2,8 @@
 #![no_main]
 
 use core::panic::PanicInfo;
-use swag_kernel::{serial_println, exit_qemu, QemuExitCode, serial_print, serial::{Green, Red}, hlt_loop};
+use swag_kernel::{serial_println, serial_print, serial::{Green, Red}, hlt_loop};
+use swag_kernel::qemu::*;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {

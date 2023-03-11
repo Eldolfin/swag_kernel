@@ -1,7 +1,6 @@
 use core::{pin::Pin, future::Future, task::{Poll, Context}, sync::atomic::{AtomicU64, Ordering}};
 use alloc::boxed::Box;
 
-pub mod simple_executor;
 pub mod executor;
 pub mod keyboard;
 

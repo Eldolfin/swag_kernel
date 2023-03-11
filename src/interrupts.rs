@@ -1,4 +1,4 @@
-use crate::{print, hlt_loop};
+use crate::hlt_loop;
 
 use pic8259::ChainedPics;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
@@ -56,7 +56,7 @@ extern "x86-interrupt" fn double_fault_handler(
 extern "x86-interrupt" fn timer_interrupt_handler(
     _stack_frame: InterruptStackFrame)
 {
-    print!(".");
+    // TODO: add timer interrupt handler I guess
     unsafe {
         PICS.lock()
             .notify_end_of_interrupt(InterruptIndex::Timer.into());

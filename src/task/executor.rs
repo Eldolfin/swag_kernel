@@ -51,7 +51,7 @@ impl Executor {
             let waker = self.waker_cache
                 .entry(task_id)
                 .or_insert_with(|| 
-                    TaskWaker::new(task_id, self.task_queue.clone())
+                    TaskWaker::new_waker(task_id, self.task_queue.clone())
                 );
             let mut context = Context::from_waker(waker);
             match task.poll(&mut context) {
@@ -84,8 +84,14 @@ impl Executor {
     }
 }
 
+impl Default for Executor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TaskWaker {
-    fn new(task_id: TaskId, task_queue: Arc<ArrayQueue<TaskId>>) -> Waker {
+    fn new_waker(task_id: TaskId, task_queue: Arc<ArrayQueue<TaskId>>) -> Waker {
         Waker::from(Arc::new(Self {
             task_id,
             task_queue,

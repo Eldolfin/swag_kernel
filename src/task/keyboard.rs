@@ -20,7 +20,7 @@ static WAKER: AtomicWaker = AtomicWaker::new();
 /// Must not block or allocate to avoir deadlocks.
 pub(crate) fn add_scancode(scancode: u8) {
     if let Ok(queue) = SCANCODE_QUEUE.try_get() {
-        if let Err(_) = queue.push(scancode) {
+        if queue.push(scancode).is_err() {
             panic!("Scancode queue full. Increase SCANCODE_QUEUE_CAPACITY");
         } else {
             WAKER.wake();
@@ -37,12 +37,18 @@ pub struct ScancodeStream {
 }
 
 impl ScancodeStream {
-    pub fn new() -> Self {
+    fn new() -> Self {
         SCANCODE_QUEUE.try_init_once(|| 
             ArrayQueue::new(SCANCODE_QUEUE_CAPACITY))
         .expect("ScancodeStream::new should be only be called once");
 
         ScancodeStream { _private: () }
+    }
+}
+
+impl Default for ScancodeStream {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -59,7 +65,7 @@ impl Stream for ScancodeStream {
             return Poll::Ready(Some(scancode));
         }
 
-        WAKER.register(&cx.waker());
+        WAKER.register(cx.waker());
         match queue.pop() {
             Some(scancode) => {
                 WAKER.take();
@@ -71,7 +77,7 @@ impl Stream for ScancodeStream {
 }
 
 pub async fn print_keypresses() {
-    let mut scancodes = ScancodeStream::new();
+    let mut scancodes = ScancodeStream::default();
     let mut keyboard = Keyboard::new(
         ScancodeSet1::new(), 
         layouts::Us104Key, 
